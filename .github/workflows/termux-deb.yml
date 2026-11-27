@@ -1,0 +1,63 @@
+name: Termux diagnostic package
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - scripts/check-termux-environment.sh
+      - packaging/termux/**
+      - .github/workflows/termux-deb.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build architecture-independent .deb
+        run: |
+          set -euo pipefail
+          VERSION="0.1.0"
+          PKG="aircrack-ng-termux-diagnostics"
+          ARCH="all"
+          ROOT="${RUNNER_TEMP}/pkgroot"
+          mkdir -p "$ROOT/DEBIAN" "$ROOT/usr/bin" "$ROOT/usr/share/doc/$PKG"
+
+          install -m 0755 scripts/check-termux-environment.sh \
+            "$ROOT/usr/bin/aircrack-ng-termux-diagnostics"
+
+          cat > "$ROOT/DEBIAN/control" <<EOF
+          Package: $PKG
+          Version: $VERSION
+          Architecture: $ARCH
+          Maintainer: FarizGD
+          Section: utils
+          Priority: optional
+          Description: Read-only Android and Termux environment diagnostics
+           Reports platform, tool availability, package state, root status,
+           SELinux mode, and visible network interfaces.
+          EOF
+
+          install -m 0644 docs/TERMUX.md "$ROOT/usr/share/doc/$PKG/README"
+          cat > "$ROOT/DEBIAN/copyright" <<'EOF'
+          Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+          Files: *
+          Copyright: 2026 FarizGD
+          License: GPL-2.0-or-later
+          EOF
+
+          dpkg-deb --root-owner-group --build "$ROOT" "${PKG}_${VERSION}_${ARCH}.deb"
+          dpkg-deb --info "${PKG}_${VERSION}_${ARCH}.deb"
+          dpkg-deb --contents "${PKG}_${VERSION}_${ARCH}.deb"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termux-diagnostics-deb
+          path: aircrack-ng-termux-diagnostics_0.1.0_all.deb
+          if-no-files-found: error
+          retention-days: 30
