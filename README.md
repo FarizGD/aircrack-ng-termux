@@ -523,3 +523,11 @@ Run the diagnostic helper with:
 ```sh
 bash scripts/check-termux-environment.sh
 ```
+
+A passive classic-PCAP metadata summary tool is documented in [docs/PCAP-SUMMARY.md](docs/PCAP-SUMMARY.md). It reports file/capture metadata and packet lengths without decoding packet payloads:
+
+```sh
+python3 scripts/pcap-summary.py capture.pcap --json
+```
+
+GitHub Actions can build an architecture-independent Termux package containing these safe utilities. The package is not the full Aircrack-ng suite.
