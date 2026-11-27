@@ -45,7 +45,7 @@ def summarize(path):
             first_ts = ts if first_ts is None else first_ts
             last_ts = ts
             packets += 1
-            total_bytes += orig
+            total_bytes += incl
             lengths[str(incl)] += 1
             if incl < orig:
                 truncated += 1
