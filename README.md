@@ -531,3 +531,6 @@ python3 scripts/pcap-summary.py capture.pcap --json
 ```
 
 GitHub Actions can build an architecture-independent Termux package containing these safe utilities. The package is not the full Aircrack-ng suite.
+
+
+The Termux package also includes `termux-hardware-report`, a read-only report of Android device/build, ABI, CPU, memory, storage, graphics-device visibility, and verified-boot properties. Run it from Termux after installing the package.
