@@ -25,7 +25,7 @@ def summarize(path):
             raise ValueError("truncated PCAP global header")
         major, minor, _zone, _sigfigs, snaplen, linktype = struct.unpack(endian + "HHIIII", rest)
         packets = 0
-        total_bytes = 0
+        total_bytes = 0\n        sum_original_bytes = 0
         lengths = Counter()
         truncated = 0
         first_ts = last_ts = None
@@ -45,7 +45,7 @@ def summarize(path):
             first_ts = ts if first_ts is None else first_ts
             last_ts = ts
             packets += 1
-            total_bytes += incl
+            total_bytes += incl\n            sum_original_bytes += orig
             lengths[str(incl)] += 1
             if incl < orig:
                 truncated += 1
@@ -55,7 +55,7 @@ def summarize(path):
             "link_type": linktype,
             "snaplen": snaplen,
             "packet_count": packets,
-            "captured_bytes": total_bytes,
+            "captured_bytes": total_bytes,\n            "original_bytes": sum_original_bytes,
             "truncated_packets": truncated,
             "first_timestamp": first_ts,
             "last_timestamp": last_ts,
