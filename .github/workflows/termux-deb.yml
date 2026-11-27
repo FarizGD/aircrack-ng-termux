@@ -46,7 +46,7 @@ jobs:
           set -euo pipefail
           VERSION="0.1.2"
           PKG="aircrack-ng-termux-tools"
-          ROOT="\${RUNNER_TEMP}/pkgroot"
+          ROOT="${RUNNER_TEMP}/pkgroot"
           PREFIX_PATH="data/data/com.termux/files/usr"
           mkdir -p "$ROOT/$PREFIX_PATH/bin" "$ROOT/$PREFIX_PATH/share/doc/$PKG" "$ROOT/DEBIAN"
           install -m 0755 scripts/check-termux-environment.sh "$ROOT/$PREFIX_PATH/bin/termux-environment-report"
@@ -70,9 +70,9 @@ jobs:
           Copyright: 2026 FarizGD
           License: GPL-2.0-or-later
           EOF
-          dpkg-deb --root-owner-group --build "$ROOT" "\${PKG}_\${VERSION}_all.deb"
-          dpkg-deb --info "\${PKG}_\${VERSION}_all.deb"
-          dpkg-deb --contents "\${PKG}_\${VERSION}_all.deb"
+          dpkg-deb --root-owner-group --build "$ROOT" "${PKG}_${VERSION}_all.deb"
+          dpkg-deb --info "${PKG}_${VERSION}_all.deb"
+          dpkg-deb --contents "${PKG}_${VERSION}_all.deb"
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
