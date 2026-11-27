@@ -513,3 +513,13 @@ Support is available in the [GitHub Discussions](https://github.com/aircrack-ng/
 Every tool has its own manpage. For aircrack-ng, `man aircrack-ng`
 
 # Infrastructure sponsors
+
+## Termux / Android
+
+Termux-specific compatibility notes and a read-only environment diagnostic helper are available in [docs/TERMUX.md](docs/TERMUX.md).
+
+Run the diagnostic helper with:
+
+```sh
+bash scripts/check-termux-environment.sh
+```
