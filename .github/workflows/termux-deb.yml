@@ -25,10 +25,10 @@ jobs:
           PKG="aircrack-ng-termux-diagnostics"
           ARCH="all"
           ROOT="${RUNNER_TEMP}/pkgroot"
-          mkdir -p "$ROOT/DEBIAN" "$ROOT/usr/bin" "$ROOT/usr/share/doc/$PKG"
+          mkdir -p "$ROOT/data/data/com.termux/files/usr/bin" "$ROOT/data/data/com.termux/files/usr/share/doc/$PKG" "$ROOT/DEBIAN"
 
           install -m 0755 scripts/check-termux-environment.sh \
-            "$ROOT/usr/bin/aircrack-ng-termux-diagnostics"
+            "$ROOT/data/data/com.termux/files/usr/bin/aircrack-ng-termux-diagnostics"
 
           cat > "$ROOT/DEBIAN/control" <<EOF
           Package: $PKG
@@ -42,7 +42,7 @@ jobs:
            SELinux mode, and visible network interfaces.
           EOF
 
-          install -m 0644 docs/TERMUX.md "$ROOT/usr/share/doc/$PKG/README"
+          install -m 0644 docs/TERMUX.md "$ROOT/data/data/com.termux/files/usr/share/doc/$PKG/README"
           cat > "$ROOT/DEBIAN/copyright" <<'EOF'
           Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
           Files: *
