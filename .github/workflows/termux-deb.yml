@@ -1,31 +1,30 @@
 name: Termux safe utilities package
-
 on:
   push:
     branches: [master]
     paths:
       - scripts/check-termux-environment.sh
+      - scripts/termux-hardware-report.sh
       - scripts/pcap-summary.py
       - docs/TERMUX.md
       - docs/PCAP-SUMMARY.md
       - .github/workflows/termux-deb.yml
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   package:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Validate Python utility
+      - name: Validate utilities
         run: |
+          set -e
+          bash -n scripts/check-termux-environment.sh
+          bash -n scripts/termux-hardware-report.sh
           python3 -m py_compile scripts/pcap-summary.py
           python3 scripts/pcap-summary.py --help
-
-      - name: Smoke-test PCAP parser on synthetic input
+      - name: Smoke-test classic PCAP parser
         run: |
           python3 - <<'PY'
           import struct
@@ -38,55 +37,46 @@ jobs:
           python3 - <<'PY'
           import json
           d = json.load(open("summary.json"))
-          assert d["packet_count"] == 1
-          assert d["captured_bytes"] == 4
-          assert d["original_bytes"] == 4
-          assert d["link_type"] == 1
-          print("PCAP smoke test passed")
+          assert d["packet_count"] == 1 and d["captured_bytes"] == 4
+          assert d["original_bytes"] == 4 and d["interfaces"][0]["link_type"] == 1
+          print("classic PCAP smoke test passed")
           PY
-
       - name: Build architecture-independent .deb
         run: |
           set -euo pipefail
-          VERSION="0.1.1"
+          VERSION="0.1.2"
           PKG="aircrack-ng-termux-tools"
-          ARCH="all"
-          ROOT="${RUNNER_TEMP}/pkgroot"
+          ROOT="\${RUNNER_TEMP}/pkgroot"
           PREFIX_PATH="data/data/com.termux/files/usr"
           mkdir -p "$ROOT/$PREFIX_PATH/bin" "$ROOT/$PREFIX_PATH/share/doc/$PKG" "$ROOT/DEBIAN"
-
           install -m 0755 scripts/check-termux-environment.sh "$ROOT/$PREFIX_PATH/bin/termux-environment-report"
+          install -m 0755 scripts/termux-hardware-report.sh "$ROOT/$PREFIX_PATH/bin/termux-hardware-report"
           install -m 0755 scripts/pcap-summary.py "$ROOT/$PREFIX_PATH/bin/pcap-summary"
           install -m 0644 docs/TERMUX.md "$ROOT/$PREFIX_PATH/share/doc/$PKG/TERMUX.md"
           install -m 0644 docs/PCAP-SUMMARY.md "$ROOT/$PREFIX_PATH/share/doc/$PKG/PCAP-SUMMARY.md"
-
           cat > "$ROOT/DEBIAN/control" <<EOF
           Package: $PKG
           Version: $VERSION
-          Architecture: $ARCH
+          Architecture: all
           Maintainer: FarizGD
           Section: utils
           Priority: optional
-          Description: Read-only Termux diagnostics and passive PCAP metadata utility
-           Reports Android environment information and summarizes PCAP metadata
-           without decoding packet payloads.
+          Description: Read-only Termux diagnostics and passive capture metadata utility
+           Reports Android environment and summarizes PCAP metadata without payload decoding.
           EOF
-
           cat > "$ROOT/DEBIAN/copyright" <<'EOF'
           Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
           Files: *
           Copyright: 2026 FarizGD
           License: GPL-2.0-or-later
           EOF
-
-          dpkg-deb --root-owner-group --build "$ROOT" "${PKG}_${VERSION}_${ARCH}.deb"
-          dpkg-deb --info "${PKG}_${VERSION}_${ARCH}.deb"
-          dpkg-deb --contents "${PKG}_${VERSION}_${ARCH}.deb"
-
+          dpkg-deb --root-owner-group --build "$ROOT" "\${PKG}_\${VERSION}_all.deb"
+          dpkg-deb --info "\${PKG}_\${VERSION}_all.deb"
+          dpkg-deb --contents "\${PKG}_\${VERSION}_all.deb"
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
           name: termux-tools-deb
-          path: aircrack-ng-termux-tools_0.1.1_all.deb
+          path: aircrack-ng-termux-tools_0.1.2_all.deb
           if-no-files-found: error
           retention-days: 30
