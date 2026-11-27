@@ -18,6 +18,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Smoke-test PCAP parser on synthetic input
+        run: |
+          python3 - <<'PY'
+          import struct
+          with open("smoke.pcap", "wb") as f:
+              f.write(struct.pack("<IHHIIII", 0xa1b2c3d4, 2, 4, 0, 0, 65535, 1))
+              f.write(struct.pack("<IIII", 1, 250000, 4, 4))
+              f.write(b"test")
+          PY
+          python3 scripts/pcap-summary.py smoke.pcap --json > summary.json
+          python3 - <<'PY'
+          import json
+          d = json.load(open("summary.json"))
+          assert d["packet_count"] == 1
+          assert d["captured_bytes"] == 4
+          assert d["link_type"] == 1
+          print("PCAP smoke test passed")
+          PY
+
       - name: Build architecture-independent .deb
         run: |
           set -euo pipefail
