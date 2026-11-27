@@ -1,45 +1,42 @@
 # Termux and Android notes
 
-This repository is based on the upstream Aircrack-ng source tree. Android is not a conventional GNU/Linux distribution: Termux uses Android's Bionic C library, its own package prefix, and the Android kernel. A successful native compile therefore does not imply that every upstream feature or hardware-dependent operation is available.
+This repository is based on the upstream Aircrack-ng source tree. Android is not a conventional GNU/Linux distribution: Termux uses Android's Bionic C library, its own package prefix, and the Android kernel. A successful native compile does not mean every upstream component or hardware feature is available.
 
-## Scope of this porting work
+## Port scope
 
-The Termux-specific work starts with compatibility assessment, build-environment diagnostics, packaging conventions, and documentation. It does not promise that every upstream component can run on every Android device.
+The Termux work provides safe environment reporting, package groundwork, and capture-file metadata inspection. It does not claim to be a complete upstream suite port.
 
-The diagnostic helper is read-only:
+## Reports
 
-```sh
-bash scripts/check-termux-environment.sh
-```
+Run these read-only reports:
 
-It reports the Termux prefix, Android and kernel versions, available build tools, selected package states, privilege availability, and visible network interfaces. It does not change device settings or test packet injection.
+\`\`\`sh
+termux-environment-report
+termux-hardware-report
+\`\`\`
 
-## Prepare a Termux build environment
+The environment report checks available tools, package states, permissions, and visible interfaces. The hardware report reports device/build properties, ABI, kernel, memory, storage, CPU feature flags, visible graphics devices, and verified-boot/lock state. Neither changes settings.
 
-Update Termux packages first:
+## Build prerequisites
 
-```sh
+\`\`\`sh
 pkg update && pkg upgrade
 pkg install git clang make autoconf automake libtool pkg-config openssl zlib
-```
+\`\`\`
 
-Additional optional libraries may be needed depending on which upstream components are being evaluated. Check package availability with `pkg search` rather than assuming Debian package names or paths apply to Termux.
+Additional dependencies vary by component. Check Termux package names with \`pkg search\`. Keep build/install paths inside \`$PREFIX\`. Do not use glibc Linux binaries in Termux: Android uses Bionic.
 
-Keep all build and install paths inside Termux's prefix (normally `$PREFIX`). Do not copy binaries or shared libraries from a glibc-based Linux distribution into Termux. Android uses Bionic, and those binaries are generally not ABI-compatible.
+## Hardware limitations
 
-## Device and driver limitations
+- Root does not automatically provide monitor-mode or injection support.
+- Hardware support depends on chipset, driver, kernel configuration, firmware, and Android build.
+- Internal Wi-Fi commonly supports managed networking only.
+- USB Wi-Fi support requires compatible USB host hardware, drivers, firmware, and permissions.
+- SELinux and Android restrictions may limit access.
+- Compilation is not hardware validation.
 
-- Root access is not equivalent to wireless monitor-mode or packet-injection support.
-- Support depends on the Wi-Fi chipset, vendor driver, kernel configuration, firmware, and Android build.
-- Many internal phone Wi-Fi drivers expose only normal managed-mode networking.
-- External USB Wi-Fi adapters additionally require compatible USB host hardware, kernel drivers, firmware, and permissions.
-- SELinux and Android process restrictions can affect access even when a device is rooted.
-- A successful build only verifies compilation and linking. It does not validate hardware capabilities.
+Remove serial numbers, device IDs, MAC addresses, and private data before sharing diagnostic output.
 
-## Environment report
+## Status
 
-When reporting a build or compatibility issue, include the output of the diagnostic helper and the exact failing command. Remove serial numbers, device identifiers, MAC addresses, and other private values before sharing logs.
-
-## Current status
-
-This documentation and diagnostic helper are groundwork, not a claim that the complete upstream suite has been ported or tested on Android. Components requiring platform-specific APIs or kernel support need separate compatibility work and device testing.
+This is compatibility groundwork, not a complete or verified Android port of upstream. Components need independent compatibility and testing.
